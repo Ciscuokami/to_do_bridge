@@ -35,11 +35,23 @@ tasksRef.orderByChild("owner").equalTo("matimandelman").once("value", snapshot =
         console.log(snapshotVal);
     }
 });
-
-
-usersRef.child("miguelez").set({
-    name: "Miguel",
-    email: "miguelez@gmail.com",
-    password: "ilovegit"
-});
 */
+
+// ? Creamos el endpoint para escribir a Miguel
+server.post("/userMiguel", (req, res) => {
+    usersRef.child("miguelez").set({
+        name: "Miguel",
+        email: "miguelez@gmail.com",
+        password: "ilovegit"
+    }, (error) => {
+        if (error) {
+            res.send({ msg: "No se ha creado un Miguel" });
+        } else {
+            res.send({ msg: "Miguel ha sido creado" });
+        }
+    });
+});
+
+server.listen(port, () => {
+    console.log(`listening on url: http://localhost:${port}`);
+})
