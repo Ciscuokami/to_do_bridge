@@ -15,3 +15,23 @@ firebase.initializeApp({
 });
 
 const db = firebase.database();
+
+const ref = db.ref("/");
+const usersRef = db.ref("/users");
+const tasksRef = db.ref("/tasks");
+
+/* Vamos a hacer una consultilla
+tasksRef.once("value", (snapshot) => {
+    console.log(snapshot.val());
+})
+*/
+
+// Consultamos tareas por usuario
+tasksRef.orderByChild("owner").equalTo("matimandelman").once("value", snapshot => {
+    const snapshotVal = snapshot.val();
+    if (snapshotVal == null) {
+        console.log("No se ha encontrado nada");
+    } else {
+        console.log(snapshotVal);
+    }
+});
