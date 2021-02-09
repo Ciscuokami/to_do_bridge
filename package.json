@@ -1,0 +1,24 @@
+{
+  "name": "to_do_bridge",
+  "version": "1.0.0",
+  "description": "Primer proyecto Fullstack grupal, to do list.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ciscuokami/to_do_bridge.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ciscuokami/to_do_bridge/issues"
+  },
+  "homepage": "https://github.com/Ciscuokami/to_do_bridge#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "firebase-admin": "^9.4.2"
+  }
+}
