@@ -20,13 +20,13 @@ const ref = db.ref("/");
 const usersRef = db.ref("/users");
 const tasksRef = db.ref("/tasks");
 
-/* Vamos a hacer una consultilla
-tasksRef.once("value", (snapshot) => {
+//Vamos a hacer una consultilla
+usersRef.once("value", (snapshot) => {
     console.log(snapshot.val());
 })
-*/
 
-// Consultamos tareas por usuario
+
+/* Consultamos tareas por usuario
 tasksRef.orderByChild("owner").equalTo("matimandelman").once("value", snapshot => {
     const snapshotVal = snapshot.val();
     if (snapshotVal == null) {
@@ -35,3 +35,11 @@ tasksRef.orderByChild("owner").equalTo("matimandelman").once("value", snapshot =
         console.log(snapshotVal);
     }
 });
+
+
+usersRef.child("miguelez").set({
+    name: "Miguel",
+    email: "miguelez@gmail.com",
+    password: "ilovegit"
+});
+*/
