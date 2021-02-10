@@ -5,6 +5,8 @@ const express = require("express");
 const server = express();
 const port = 8080;
 
+server.use(express.json());
+
 // Config DB
 const firebase = require("firebase-admin");
 const serviceAccount = require("./serviceAccount.json");
@@ -20,37 +22,25 @@ const ref = db.ref("/");
 const usersRef = db.ref("/users");
 const tasksRef = db.ref("/tasks");
 
-//Vamos a hacer una consultilla
-usersRef.once("value", (snapshot) => {
-    console.log(snapshot.val());
-})
-
-
-/* Consultamos tareas por usuario
-tasksRef.orderByChild("owner").equalTo("matimandelman").once("value", snapshot => {
-    const snapshotVal = snapshot.val();
-    if (snapshotVal == null) {
-        console.log("No se ha encontrado nada");
+//? Endpoint Create User
+server.post("/createUser", (req, res) => {
+    const { nickname, name, email, password } = req.body;
+    if (usersRef.child(nickname)) {
+        res.send({ "error": `El usuario ${nickname} ya existe` });
     } else {
-        console.log(snapshotVal);
-    }
-});
-*/
-
-// ? Creamos el endpoint para escribir a Miguel
-server.post("/userMiguel", (req, res) => {
-    usersRef.child("miguelez").set({
-        name: "Miguel",
-        email: "miguelez@gmail.com",
-        password: "ilovegit"
-    }, (error) => {
-        if (error) {
-            res.send({ msg: "No se ha creado un Miguel" });
-        } else {
-            res.send({ msg: "Miguel ha sido creado" });
-        }
-    });
-});
+        usersRef.child(nickname).set({
+            name,
+            email,
+            password
+        }, (error) => {
+            if (error) {
+                res.send({ msg: `No ha sido posible crear el usuario ${nickname}` });
+            } else {
+                res.send({ msg: `Se ha creado el usuario ${nickname}` });
+            }
+        });
+    };
+})
 
 server.listen(port, () => {
     console.log(`listening on url: http://localhost:${port}`);
