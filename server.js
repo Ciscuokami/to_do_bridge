@@ -5,6 +5,8 @@ const express = require("express");
 const server = express();
 const port = 8080;
 
+server.use(express.json());
+
 // Config DB
 const firebase = require("firebase-admin");
 const serviceAccount = require("./serviceAccount.json");
@@ -37,20 +39,58 @@ tasksRef.orderByChild("owner").equalTo("matimandelman").once("value", snapshot =
 });
 */
 
-// ? Creamos el endpoint para escribir a Miguel
-server.post("/userMiguel", (req, res) => {
-    usersRef.child("miguelez").set({
-        name: "Miguel",
-        email: "miguelez@gmail.com",
-        password: "ilovegit"
-    }, (error) => {
-        if (error) {
-            res.send({ msg: "No se ha creado un Miguel" });
-        } else {
-            res.send({ msg: "Miguel ha sido creado" });
-        }
-    });
+/*
+==========================
+    USERS
+==========================
+*/
+
+
+// ? Modify user (put)
+
+server.put("/user/:nickname", (req, res) => {
+    let {name, email, password} = req.body;
+    let {nickname} = req.params;
+    if(!name && !email && !password)
+        res.send({"msg": "You must provide any of the user data"});
+    else {
+        usersRef.child(nickname).once("value", snapshot => {
+            if(snapshot.val() === null)
+                res.send({"error": "Invalid userId"})
+            else {
+                const newData = {};
+                if(name)
+                    newData.name = name;
+                if(email)
+                    newData.email = email;
+                if(password)
+                    newData.password = password;
+                usersRef.child(nickname).update(newData);
+                res.send({"msg": "Se ha actualizado correctamente"});
+
+            }
+        })
+    }
 });
+
+// usersRef.child("miguelez").update({
+//     email: "miguel@batin.com"
+// });
+
+
+/*
+==========================
+    TASKS
+==========================
+*/
+
+//? Create Task
+
+
+//? Delete Task
+
+
+//? Modify Task
 
 server.listen(port, () => {
     console.log(`listening on url: http://localhost:${port}`);
