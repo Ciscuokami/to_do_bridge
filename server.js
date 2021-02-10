@@ -95,3 +95,10 @@ server.put("/user/:nickname", (req, res) => {
 server.listen(port, () => {
     console.log(`listening on url: http://localhost:${port}`);
 })
+
+server.delete("/users/:id", (req, res) => {
+	const {id} = req.params;
+    usersRef.child(id).remove();
+	res.send({"msg": `User ${id} deleted`});
+    
+});
