@@ -103,6 +103,36 @@ server.delete("/user/:id", (req, res) => {
 
 //? Modify Task
 
+server.put("/task/:id", (req, res) => {
+    let { title, description, lastDate, priority, status } = req.body;
+    let { id } = req.params;
+    if (!title && !description && !lastDate && !priority && !status)
+        res.send({ "msg": "You must provide any of the task data" });
+    else {
+        tasksRef.child(id).once("value", snapshot => {
+            if (snapshot.val() === null)
+                res.send({ "error": "Invalid taskId" })
+            else {
+                const newData = {};
+                if (title)
+                    newData.title = title;
+                if (description)
+                    newData.description = description;
+                if (lastDate)
+                    newData.lastDate = lastDate;
+                if (priority)
+                    newData.priority = priority;
+                if (status)
+                    newData.status = status;
+                tasksRef.child(id).update(newData);
+                res.send({ "msg": "the task has been successfully updated" });
+
+            }
+        });
+    }
+});
+
+
 server.listen(port, () => {
     console.log(`listening on url: http://localhost:${port}`);
 })
