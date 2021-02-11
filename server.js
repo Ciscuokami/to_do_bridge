@@ -100,8 +100,35 @@ server.delete("/user/:id", (req, res) => {
 
 //? Delete Task
 
+server.delete("/task/:id", (req, res) => {
+    const { id } = req.params;
+    tasksRef.child(id).remove();
+    res.send({ "msg": `Task ${id} deleted` });
+});
 
 //? Modify Task
+
+
+
+//? Modify Task Status
+
+
+server.put("/task/:id", (req, res) => {
+    let { status } = req.body;
+    let { id } = req.params;
+        tasksRef.child(id).once("value", snapshot => {
+            if (snapshot.val() === null)
+                res.send({ "error": "Invalid taskId" })
+            else {
+                const newData = {};
+                if (status)
+                    newData.status = status;
+                tasksRef.child(id).update(newData);
+                res.send({ "msg": "Se ha actualizado correctamente" });
+            }
+        });
+});
+
 
 server.listen(port, () => {
     console.log(`listening on url: http://localhost:${port}`);
