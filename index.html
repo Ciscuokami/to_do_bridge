@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Do Bridge</title>
+</head>
+<body>
+    <h1>BIENVENIDOS A TO DO BRIDGE</h1> 
+    <div id="login" class="form">
+        <form  > 
+          <h1>Login</h1> 
+          <p> 
+              <label for="username" class="uname" > Nombre de usuario: </label>
+              <input id="username" name="username" required="required" type="text" placeholder="Tu nombre de usuario"/>
+          </p>
+          <p> 
+              <label for="password" class="youpasswd"> Contraseña:</label>
+              <input id="password" name="password" required="required" type="password" placeholder="Tu password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Debe contener al menos un número y una letra minúscula y mayúscula, y al menos 8 o más caracteres"/> 
+          </p>
+      
+          <p class="login button"> 
+            <a href=""><input type="submit" value="Login" /></a>
+          </p>
+          <p class="change_link">
+              ¿Aún no eres miembro? regístrate aquí abajo
+          </p>
+        </form>
+      </div>
+      
+      
+      
+      
+      <div id="register" class="form">
+        <form > 
+          <h1>Registro</h1> 
+          <p> 
+              <label for="usernamesignup" class="uname" >Nombre de usuario</label>
+              <input id="usernamesignup" name="usernamesignup" required="required" type="text" placeholder="Nombre" />
+          </p>
+          <p> 
+              <label for="emailsignup" class="youmail" > Tu email</label>
+              <input id="emailsignup" name="emailsignup" required="required" type="email" placeholder="ejemplo@mail.com"/> 
+          </p>
+          <p> 
+              <label for="passwordsignup" class="youpasswd" >Contraseña </label>
+              <input id="passwordsignup" name="passwordsignup" required="required" type="password" placeholder="eg. X8df!90EO" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Debe contener al menos un número y una letra minúscula y mayúscula, y al menos 8 o más caracteres"/> 
+          </p>
+          <p> 
+              <label for="passwordsignup_confirm" class="youpasswd" >Confirma tu contraseña </label>
+              <input id="passwordsignup_confirm" name="passwordsignup_confirm" required="required" type="password" placeholder="eg. X8df!90EO"/>
+          </p>
+          <p class="signin button"> 
+            <a href=""><input type="submit" value="Registro"> </a>
+          </p>
+          </p>
+        </form>
+      </div>
+</body>
+</html>

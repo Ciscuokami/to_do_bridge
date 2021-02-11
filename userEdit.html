@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuario</title>
+</head>
+<body>   
+      
+
+      <div id="EditUser" class="form">
+        <form> 
+          <h1> Editar Usuario</h1> 
+          <p> 
+              <label for="usernamesignup" class="uname" >Nombre de usuario</label>
+              <input id="usernamesignup" name="usernamesignup" required="required" type="text" placeholder="Nombre" />
+          </p>
+          <p> 
+              <label for="emailsignup" class="youmail" > Tu email</label>
+              <input id="emailsignup" name="emailsignup" required="required" type="email" placeholder="ejemplo@mail.com"/> 
+          </p>
+          <p> 
+              <label for="passwordsignup" class="youpasswd" >Tu password </label>
+              <input id="passwordsignup" name="passwordsignup" required="required" type="password" placeholder="eg. X8df!90EO" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Debe contener al menos un número y una letra minúscula y mayúscula, y al menos 8 o más caracteres"/> 
+          </p>
+
+          <p class="save button"> 
+              <input type="submit" value="Guardar Cambios"/> 
+          </p>
+        </form>
+      </div>
+</body>
+</html>
