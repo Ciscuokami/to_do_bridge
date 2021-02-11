@@ -23,7 +23,6 @@ const usersRef = db.ref("/users");
 const tasksRef = db.ref("/tasks");
 
 
-
 /*
 ==========================
     USERS
@@ -96,6 +95,26 @@ server.delete("/user/:id", (req, res) => {
 */
 
 //? Create Task
+server.post("/task", (req, res) => {
+    const { description, lastDate, priority, status, title } = req.body;
+    if (!title) {
+        res.send({ "msg": "You must provide a title" });
+    } else {
+        tasksRef.push({
+            description,
+            lastDate,
+            priority,
+            status,
+            title
+        }, (error) => {
+            if (error) {
+                res.send({ msg: `cant be created the task ${title}` });
+            } else {
+                res.send({ msg: `the task have been created ${title}` });
+            }
+        });
+    }
+});
 
 
 //? Delete Task
@@ -107,28 +126,50 @@ server.delete("/task/:id", (req, res) => {
 });
 
 //? Modify Task
-
-
+server.put("/task/:id", (req, res) => {
+    let { title, description, lastDate, priority, status } = req.body;
+    let { id } = req.params;
+    if (!title && !description && !lastDate && !priority && !status) {
+        res.send({ "msg": "You must provide any of the task data" });
+    } else {
+        if (title)
+            newData.title = title;
+        if (description)
+            newData.description = description;
+        if (lastDate)
+            newData.lastDate = lastDate;
+        if (priority)
+            newData.priority = priority;
+        if (status)
+            newData.status = status;
+        tasksRef.child(id).update(newData);
+        res.send({ "msg": "the task has been successfully updated" });
+    }
+});
 
 //? Modify Task Status
-
-
 server.put("/task/:id", (req, res) => {
     let { status } = req.body;
     let { id } = req.params;
-        tasksRef.child(id).once("value", snapshot => {
-            if (snapshot.val() === null)
-                res.send({ "error": "Invalid taskId" })
-            else {
-                const newData = {};
-                if (status)
-                    newData.status = status;
-                tasksRef.child(id).update(newData);
-                res.send({ "msg": "Se ha actualizado correctamente" });
-            }
-        });
+    tasksRef.child(id).once("value", snapshot => {
+        if (snapshot.val() === null)
+            res.send({ "error": "Invalid taskId" })
+        else {
+            const newData = {};
+            if (status)
+                newData.status = status;
+            tasksRef.child(id).update(newData);
+            res.send({ "msg": "Se ha actualizado correctamente" });
+        }
+    });
 });
 
+
+/*
+==========================
+    LISTEN PORT
+==========================
+*/
 
 server.listen(port, () => {
     console.log(`listening on url: http://localhost:${port}`);
