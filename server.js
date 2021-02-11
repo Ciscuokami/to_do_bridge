@@ -1,6 +1,11 @@
 // Configurando servidor
 const express = require("express");
 
+// Imports
+
+const { v4: uuid } = require('uuid');
+
+
 // Settings
 const server = express();
 const port = 8080;
@@ -96,6 +101,31 @@ server.delete("/user/:id", (req, res) => {
 */
 
 //? Create Task
+server.post("/task", (req, res) => {
+    const { description, lastDate, priority, status, title } = req.body;
+    const id = uuid();
+    if (!title) {
+        res.send({ "msg": "You must provide a title" });
+    } else {
+        taskRef.child(id).once("value", snapshot => {
+            taskRef.child(id).set({
+                description,
+                lastDate,
+                priority,
+                status,
+                title
+            }, (error) => {
+                if (error) {
+                    res.send({ msg: `cant be created the task ${title}` });
+                } else {
+                    res.send({ msg: `the task have been created ${title}` });
+                }
+            });
+        });
+    }
+});
+
+
 
 
 //? Delete Task
@@ -133,3 +163,4 @@ server.put("/task/:id", (req, res) => {
 server.listen(port, () => {
     console.log(`listening on url: http://localhost:${port}`);
 })
+
