@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="ASSETS/JS/main.js"></script>
     <title>Crear tarea</title>
 </head>
 
@@ -12,18 +13,18 @@
     <h1>Crear tarea</h1>
     <p>Indica los datos de la tarea</p>
     <form id="createTask">
-        <label>Titulo *</label> <input id="title" type="text"><br><br>
-        <input id="title" type="checkbox"> Completada<br><br>
-        <label>Fecha límite</label> <input id="lastDate" type="date" value="dd/mm/aaaa"><br><br>
+        <label>Titulo *</label> <input name="title" type="text"><br><br>
+        <input name="status" type="checkbox"> Completada<br><br>
+        <label>Fecha límite</label> <input name="lastDate" type="date" value="dd/mm/aaaa"><br><br>
         <label>Prioridad</label>
-        <select id="priority">
+        <select name="priority">
             <option value="">Seleccionar...</option>
             <option value="1">Alta</option>
             <option value="2">Media</option>
             <option value="3">Baja</option>
         </select><br><br>
-        <label>Descripción</label> <textarea rows="4" cols="50"></textarea><br><br>
-        <button type="button">Guardar tarea</button>
+        <label>Descripción</label> <textarea name="description" rows="4" cols="50"></textarea><br><br>
+        <button type="button" onclick="createTask();">Crear tarea</button>
         <button type="button">Editar tarea</button>
         <button type="button">Eliminar tarea</button>
     </form>
