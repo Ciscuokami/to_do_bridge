@@ -4,8 +4,12 @@ const express = require("express");
 // Settings
 const server = express();
 const port = 8080;
-
-server.use(express.json());
+const cors = require('cors')
+const bodyParser = require('body-parser');
+server.use(cors());
+server.options('*', cors());
+server.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
+server.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000, type: 'application/x-www-form-urlencoded' }));
 
 // Config DB
 const firebase = require("firebase-admin");
@@ -13,7 +17,8 @@ const serviceAccount = require("./serviceAccount.json");
 
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
-    databaseURL: "https://todobridgeok-default-rtdb.europe-west1.firebasedatabase.app/"
+    databaseURL: "https://todobridge-1ae8b-default-rtdb.europe-west1.firebasedatabase.app/"
+        //databaseURL: "https://todobridgeok-default-rtdb.europe-west1.firebasedatabase.app/"
 });
 
 const db = firebase.database();
@@ -21,7 +26,6 @@ const db = firebase.database();
 const ref = db.ref("/");
 const usersRef = db.ref("/users");
 const tasksRef = db.ref("/tasks");
-
 
 /*
 ==========================
@@ -94,11 +98,25 @@ server.delete("/user/:id", (req, res) => {
 ==========================
 */
 
+//? List Tasks
+server.get("/task", (req, res) => {
+    tasksRef.once("value", snapshot => {
+        const snapshotVal = snapshot.val()
+        if (snapshotVal == null) {
+            res.send({ "error": "no hay tareas" })
+        } else {
+            res.send({ "msg": snapshotVal });
+        }
+    });
+});
+
+
 //? Create Task
 server.post("/task", (req, res) => {
     const { description, lastDate, priority, status, title } = req.body;
+    console.log(req.body);
     if (!title) {
-        res.send({ "msg": "You must provide a title" });
+        res.status(400).json({ "error": "You must provide a title" });
     } else {
         tasksRef.push({
             description,
@@ -108,9 +126,9 @@ server.post("/task", (req, res) => {
             title
         }, (error) => {
             if (error) {
-                res.send({ msg: `cant be created the task ${title}` });
+                res.json({ msg: `The task ${title} can´t be created` });
             } else {
-                res.send({ msg: `the task have been created ${title}` });
+                res.json({ msg: `The task ${title} has been created ` });
             }
         });
     }
