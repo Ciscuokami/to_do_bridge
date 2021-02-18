@@ -26,6 +26,30 @@ async function createTask() {
     })
 }
 
+
+/*
+=====================================
+  USUARIOS
+=====================================
+*/
+
+// Crear usuario
+async function createUser() {
+    const form = document.getElementById("createUser");
+    var obj = {};
+    for (var i = 0; i < form.elements.length; i++) {
+        var item = form.elements.item(i);
+        obj[item.name] = item.value;
+    }
+    const response = await fetch("http://localhost:8080/user", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(obj)
+    })
+}
+
 //? Modificar Tarea
 
 function modifyTask() {
@@ -38,7 +62,7 @@ function modifyTask() {
 
 function printTaskData(tasks) {
     const tareas = Object.entries(tasks).map(([key, value]) => {
-        return {id: key, ...value}
+        return { id: key, ...value }
     });
 
     const selectedViewerGrid = document.querySelector("#viewerGrid");
@@ -105,7 +129,7 @@ async function getTasks() {
             // const tasks = data.msg;
             // console.log("task del fetch:", tasks);
             // printTaskData(tasks);
-        // });
+            // });
         const data = await response.json();
 
         console.log("Datos pedidos")
