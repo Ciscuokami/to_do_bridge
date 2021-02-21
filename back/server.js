@@ -1,9 +1,10 @@
 // Configurando servidor
 const express = require("express");
 
+
 // Settings
+const PORT = 8080;
 const server = express();
-const port = 8080;
 const cors = require('cors')
 const bodyParser = require('body-parser');
 server.use(cors());
@@ -18,7 +19,6 @@ const serviceAccount = require("./serviceAccount.json");
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
     databaseURL: "https://todobridge-1ae8b-default-rtdb.europe-west1.firebasedatabase.app/"
-        //databaseURL: "https://todobridgeok-default-rtdb.europe-west1.firebasedatabase.app/"
 });
 
 const db = firebase.database();
@@ -37,21 +37,22 @@ const tasksRef = db.ref("/tasks");
 
 server.post("/user", (req, res) => {
     const { nickname, name, email, password } = req.body;
-    usersRef.child(nickname).once("value", snapshot => {
+    usersRef.orderByChild("nickname").equalTo(nickname).once("value", snapshot => {
         if (snapshot.val() === null) {
-            usersRef.child(nickname).set({
+            usersRef.push({
+                nickname,
                 name,
                 email,
                 password
             }, (error) => {
                 if (error) {
-                    res.send({ msg: `No ha sido posible crear el usuario ${nickname}` });
+                    res.send({ msg: `The user ${nickname} cannot be created` });
                 } else {
-                    res.send({ msg: `Se ha creado el usuario ${nickname}` });
+                    res.send({ msg: `The user ${nickname} has been created` });
                 }
             });
         } else {
-            res.send({ "error": `El usuario ${nickname} ya existe` });
+            res.send({ "error": `The user ${nickname} already exists` });
         }
     });
 });
@@ -182,13 +183,12 @@ server.put("/task/:id", (req, res) => {
     });
 });
 
-
 /*
 ==========================
     LISTEN PORT
 ==========================
 */
 
-server.listen(port, () => {
-    console.log(`listening on url: http://localhost:${port}`);
+server.listen(PORT, () => {
+    console.log(`listening on url: http://localhost:${PORT}`);
 })
