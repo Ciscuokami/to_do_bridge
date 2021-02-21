@@ -144,7 +144,7 @@ function logRegErrors() {
 //? Login
 
 function loginApp() {
-    getTasks();
+
 }
 
 //? Register
@@ -195,7 +195,6 @@ async function createTask() {
         body: JSON.stringify(obj)
     })
 }
-
 
 
 //? Modificar Tarea
@@ -276,7 +275,9 @@ async function getTasks() {
 };
 
 
-getTasks().then(data => {
-    const tasks = data.msg;
-    printTaskData(tasks);
-});
+function getData() {
+    getTasks().then(data => {
+        const tasks = data.msg;
+        printTaskData(tasks);
+    })
+};

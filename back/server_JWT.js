@@ -1,72 +1,127 @@
 // Configurando servidor
 const express = require("express");
-const base64 = require("base-64");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
+const JWT = require("jwt-simple");
 
 // Settings
-const server = express();
 const PORT = 8080;
-//const SECRET = crypto.randomBytes(32).toString("hex");
 const SECRET = "f2ac41f4dd36b5063ac14edc64c91d1728d7acde6b69acbc32566b2883247c64";
+const server = express();
 
-// Hashing SHA256
-function hashString(string) {
-    const hashedString = crypto.createHmac("sha256", SECRET).update(string).digest("base64");
+const users = {};
+
+const excludedPaths = ["/user POST", "/login POST"];
+
+// Middlewares
+
+server.use(express.json());
+server.use(cors());
+server.use(cookieParser());
+
+//? Hashing Pw
+function hashString(string, secret = SECRET) {
+    const hashedString = crypto.createHmac("sha256", secret).update(string).digest("hex");
     return hashedString;
 };
 
-// Base 64 URL functions
-function parsebase64ToURL(base64String) {
-    const parsedString = base64String.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_").toString("base64");
-    return parsedString;
+function saltPepperPw(password, salt = crypto.randomBytes(16).toString("hex")) {
+    let hash = hashString(hashString(password), salt);
+    return { password: hash, salt };
+};
+
+// Funcion que verifica el Path
+function checkPath(pathname, method) {
+    const endpoint = `${pathname} ${method}`;
+    return excludedPaths.includes(endpoint);
 }
 
-function encodeBase64(string) {
-    const encodedString = base64.encode(string);
-    const base64String = parsebase64ToURL(encodedString);
-    return base64String;
-};
-
-function decodeBase64(base64String) {
-    const decodedString = base64.decode(base64String);
-    return decodedString;
-};
-
-// JWT functions
-
-function generateJWT(payload) {
-    const Header = {
-        "alg": "HS256",
-        "typ": "JWT"
-    };
-    const encodedheader = encodeBase64(JSON.stringify(Header));
-    const encodedPayload = encodeBase64(JSON.stringify(payload));
-    const signature = encodeBase64(hashString(`${encodedheader}.${encodedPayload}`));
-    JWT = `${encodedheader}.${encodedPayload}.${signature}`;
-    return JWT;
-};
-
-function verifyJWT(jwt) {
-    const [Header, Payload, Signature] = jwt.split(".");
-    const expectedSignature = encodeBase64(hashString(`${Header}.${Payload}`));
-    if (Signature === expectedSignature)
-        return JSON.parse(decodeBase64(Payload));
-    return null;
-};
-
-server.get("/", (req, res) => {
-    const JWT = generateJWT({
-        username: "Miguel"
-    });
-    console.log(verifyJWT(JWT));
-    res.send({ JWT })
+server.use((req, res, next) => {
+    if (!checkPath(req.path, req.method)) {
+        const { jwt } = req.cookies;
+        let payload;
+        try {
+            if (jwt) {
+                payload = JWT.decode(jwt, SECRET);
+                if (payload) {
+                    req.user = payload;
+                    next();
+                } else {
+                    throw "No valid JWT";
+                }
+            } else {
+                throw "No payload";
+            }
+        } catch (e) {
+            res.status(403).send({ error: "You must be logged in" });
+        }
+    } else {
+        next();
+    }
 });
 
-/*
-====
-Aqui va el BU
-===
-*/
+//? Crear usuario
+
+server.post("/user", (req, res) => {
+    const { username, password } = req.body;
+    const passwordPattern = /^[A-Z][a-zA-Z0-9]/;
+    if (username && password) {
+        if (passwordPattern.test(password)) {
+            res.send({ msg: "User created" });
+            users[username] = {
+                username,
+                password: saltPepperPw(password)
+            }
+            console.log(users);
+        } else {
+            res.send({ "error": "The password must contain numbers, upper and lower case letters." });
+        }
+    } else {
+        res.send({ "error": "A username and a password must be provided" });
+    }
+});
+
+server.post("/login", (req, res) => {
+    const { username, password } = req.body;
+    if (username && password) {
+        const user = users[username];
+        if (user) {
+            if (verifyPw(password, user.password)) {
+                res.cookie("jwt", JWT.encode({
+                    "iat": new Date(),
+                    "sub": username
+                }, SECRET), { httpOnly: true });
+                res.send({ "msg": "You have loggedin" });
+            } else {
+                res.send({ "error": "The user or the password is not ok" });
+            }
+        } else {
+            res.send({ "error": "No such user registered" });
+        }
+    } else {
+        res.send({ "error": "A username and a password must be provided" });
+    }
+})
+
+function verifyPw(password, originalPassword) {
+    const hashedPw = saltPepperPw(password, originalPassword.salt);
+    return hashedPw.password === originalPassword.password;
+
+}
+//Chequeamos el inicio de sesiones en los paths no excluidos
+
+server.get("/user", (req, res) => {
+    res.send({ "msg": "You are logged in", "data": req.user });
+});
+
+//LOgout
+
+server.get("/logout", (req, res) => {
+    res.clearCookie("jwt").send({ "msg": "cookie deleted" });
+})
+
+
 /*
 ==========================
     LISTEN PORT
