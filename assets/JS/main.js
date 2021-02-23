@@ -49,7 +49,7 @@ function loginPainter() {
     loginBtn.id = "loginBtn";
     loginBtn.innerText = "Login";
     loginBtn.preventDefault;
-    loginBtn.addEventListener("click", getTasks);
+    loginBtn.addEventListener("click", getData);
     forgetLink.id = "forgetLink";
     forgetLink.innerHTML = `Don´t have an account? Register <a href="#" onclick="registerPainter()" >here</a>`;
 
@@ -215,6 +215,16 @@ function printTaskData(tasks) {
     if (noNew) {
         noNew.remove();
     };
+
+    const title = document.createElement("h2");
+    const searchTask = document.createElement("div");
+    const labelInput = document.createElement("label");
+    const inputName = document.createElement("input");
+    const searchBtn = document.createElement("button");
+    const searchOnGoing = document.createElement("button");
+    const searchGoingLate = document.createElement("button");
+    const searchDone = document.createElement("button");
+
     const body = document.querySelector("body");
     const container = document.createElement("div");
     const contentGrid = document.createElement("div");
@@ -226,12 +236,41 @@ function printTaskData(tasks) {
     titleTasks.id = "tituloTareas";
     contentGrid.id = "viewerGrid";
 
+    title.innerText = "Lista de Tareas";
+    title.className = "title";
+    searchTask.id = "searchBox";
+    labelInput.innerText = "Buscador de Tareas";
+    inputName.placeholder = "Indica un nombre"
+    searchBtn.innerText = "Buscar";
+    searchOnGoing.innerText = "On Going";
+    searchGoingLate.innerText = "Going Late";
+    searchDone.innerText = "Done";
+    searchBtn.id = "search";
+    searchOnGoing.id = "onGoing";
+    searchGoingLate.id = "goingLate";
+    searchDone.id = "done";
+    searchBtn.preventDefault;
+
     titleTasks.innerText = "Tareas";
 
     body.appendChild(container);
     container.appendChild(headerTasks);
     headerTasks.appendChild(titleTasks);
     container.appendChild(contentGrid);
+
+    searchBtn.addEventListener("click", getFilterData);
+    searchOnGoing.addEventListener("click", getFilterDataOnGoing);
+    searchGoingLate.addEventListener("click", getFilterDataGoingLate);
+    searchDone.addEventListener("click", getFilterDataDone);
+
+    contentGrid.appendChild(title);
+    contentGrid.appendChild(searchTask);
+    searchTask.appendChild(labelInput);
+    searchTask.appendChild(inputName);
+    searchTask.appendChild(searchBtn);
+    searchTask.appendChild(searchOnGoing);
+    searchTask.appendChild(searchGoingLate);
+    searchTask.appendChild(searchDone);
 
     const listElements = tareas.map((task) => {
         const div = document.createElement("div");
@@ -264,6 +303,7 @@ function printTaskData(tasks) {
 }
 
 
+
 async function getTasks() {
     try {
         const response = await fetch("http://localhost:8080/task");
@@ -281,3 +321,144 @@ function getData() {
         printTaskData(tasks);
     })
 };
+
+//? Filtrar Tasks
+
+function filterTask(a) {
+    const task = document.querySelector("input");
+    const taskValue = task.value;
+    console.log("tasks.value:", taskValue)
+    const tasks = Object.entries(a).map(([key, value]) => {
+        return { id: key, ...value }
+    }).filter((task) => task.description?.toLowerCase().includes(taskValue.toLowerCase())  || task.title?.toLowerCase().includes(taskValue.toLowerCase()));
+
+    console.log("tasks:", tasks);
+
+    printTaskData(tasks);
+    const cleanerBtn = document.querySelector("#clean");
+    if (!cleanerBtn) {
+
+        const cleanBtn = document.createElement("button");
+        cleanBtn.id = "clean";
+        cleanBtn.innerText = "Limpiar búsqueda";
+        cleanBtn.preventDefault;
+        cleanBtn.addEventListener("click", getData);
+        container.appendChild(cleanBtn);
+    }
+
+}
+
+
+//? Filtrar Tasks On Going
+
+function filterOnGoing(a) {
+
+    const tasks = Object.entries(a).map(([key, value]) => {
+        return { id: key, ...value }
+    }).filter((task) => task.status === ("on going"));
+
+    printTaskData(tasks);
+    const cleanerBtn = document.querySelector("#clean");
+    if (!cleanerBtn) {
+
+        const cleanBtn = document.createElement("button");
+        cleanBtn.id = "clean";
+        cleanBtn.innerText = "Limpiar búsqueda";
+        cleanBtn.preventDefault;
+        cleanBtn.addEventListener("click", getData);
+        container.appendChild(cleanBtn);
+    }
+}
+
+//? Filtrar Tasks Going Late
+
+function filterGoingLate(a) {
+
+    const tasks = Object.entries(a).map(([key, value]) => {
+        return { id: key, ...value }
+    }).filter((task) => task.status === ("going late"));
+
+    printTaskData(tasks);
+    const cleanerBtn = document.querySelector("#clean");
+    if (!cleanerBtn) {
+
+        const cleanBtn = document.createElement("button");
+        cleanBtn.id = "clean";
+        cleanBtn.innerText = "Limpiar búsqueda";
+        cleanBtn.preventDefault;
+        cleanBtn.addEventListener("click", getData);
+        container.appendChild(cleanBtn);
+    }
+}
+
+//? Filtrar Tasks On Done
+
+function filterDone(a) {
+
+    const tasks = Object.entries(a).map(([key, value]) => {
+        return { id: key, ...value }
+    }).filter((task) => task.status === ("done"));
+
+    printTaskData(tasks);
+    const cleanerBtn = document.querySelector("#clean");
+    if (!cleanerBtn) {
+
+        const cleanBtn = document.createElement("button");
+        cleanBtn.id = "clean";
+        cleanBtn.innerText = "Limpiar búsqueda";
+        cleanBtn.preventDefault;
+        cleanBtn.addEventListener("click", getData);
+        container.appendChild(cleanBtn);
+    }
+}
+
+//? Trae los datos para filtrar
+
+async function getFilterTasks() {
+    try {
+        const response = await fetch("http://localhost:8080/task");
+        const data = await response.json()
+        return data;
+    } catch (error) {
+        throw "Datos no encontrados"
+    }
+};
+
+
+function getFilterData() {
+    getFilterTasks().then(data => {
+        const filterTasks = data.msg;
+        filterTask(filterTasks);
+    })
+};
+
+function getFilterDataOnGoing() {
+    getFilterTasks().then(data => {
+        const filterTasks = data.msg;
+        filterOnGoing(filterTasks);
+    })
+};
+
+function getFilterDataGoingLate() {
+    getFilterTasks().then(data => {
+        const filterTasks = data.msg;
+        filterGoingLate(filterTasks);
+    })
+};
+
+function getFilterDataDone() {
+    getFilterTasks().then(data => {
+        const filterTasks = data.msg;
+        filterDone(filterTasks);
+    })
+};
+
+// Esto es para probar el filter, luego borrar y descomentar todo
+
+// function loginPainter(){ //aqui va el datalist.results
+//     getData();
+//     // getFilterData();
+
+// }
+
+// loginPainter();
