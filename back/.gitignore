@@ -2,3 +2,5 @@ node_modules
 package-lock.json
 serviceAccount.json
 serviceAccount_BU.json
+
+cert/*
