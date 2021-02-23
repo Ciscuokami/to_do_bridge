@@ -49,7 +49,7 @@ function loginPainter() {
     loginBtn.id = "loginBtn";
     loginBtn.innerText = "Login";
     loginBtn.preventDefault;
-    loginBtn.addEventListener("click", getTasks);
+    loginBtn.addEventListener("click", loginApp);
     forgetLink.id = "forgetLink";
     forgetLink.innerHTML = `Don´t have an account? Register <a href="#" onclick="registerPainter()" >here</a>`;
 
@@ -144,7 +144,18 @@ function logRegErrors() {
 //? Login
 
 function loginApp() {
-
+    const userNick = document.getElementById("nickname");
+    const userPw = document.getElementById("password");
+    fetch("http://localhost:8080/login", {
+        method: "POST",
+        body: JSON.stringify({
+            "nickname": userNick.value,
+            "password": userPw.value
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(response => response.json()).then(getData()).catch(e => console.error(e))
 }
 
 //? Register
@@ -156,18 +167,21 @@ function registerApp() {
 //? Create users
 
 async function createUser() {
-    const form = document.getElementById("createUserForm");
-    var obj = {};
-    for (var i = 0; i < form.elements.length; i++) {
-        var item = form.elements.item(i);
-        obj[item.id] = item.value;
-    }
+    const userNick = document.getElementById("nickname");
+    const userPw = document.getElementById("password");
+    const userName = document.getElementById("name");
+    const userEmail = document.getElementById("email");
     const response = await fetch("http://localhost:8080/user", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(obj)
+        body: JSON.stringify({
+            "nickname": userNick.value,
+            "password": userPw.value,
+            "name": userName.value,
+            "email": userEmail.value
+        })
     })
 }
 
@@ -187,7 +201,7 @@ async function createTask() {
         var item = form.elements.item(i);
         obj[item.name] = item.value;
     }
-    const response = await fetch("http://localhost:8080/task", {
+    await fetch("http://localhost:8080/task", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

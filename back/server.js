@@ -1,16 +1,28 @@
 // Configurando servidor
 const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const crypto = require("crypto");
+const JWT = require("jwt-simple");
+const bodyParser = require('body-parser');
 
 
 // Settings
 const PORT = 8080;
 const server = express();
-const cors = require('cors')
-const bodyParser = require('body-parser');
+const SECRET = "f2ac41f4dd36b5063ac14edc64c91d1728d7acde6b69acbc32566b2883247c64";
+const excludedPaths = ["/user POST", "/login POST"];
+
+
+// Middlewares
+
+server.use(express.json());
 server.use(cors());
+server.use(cookieParser());
 server.options('*', cors());
 server.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
 server.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000, type: 'application/x-www-form-urlencoded' }));
+
 
 // Config DB
 const firebase = require("firebase-admin");
@@ -29,6 +41,102 @@ const tasksRef = db.ref("/tasks");
 
 /*
 ==========================
+    AUTHENTICATON
+==========================
+*/
+
+//? Hashing Pw
+function hashString(string, secret = SECRET) {
+    const hashedString = crypto.createHmac("sha256", secret).update(string).digest("hex");
+    return hashedString;
+};
+
+function saltPepperPw(password, salt = crypto.randomBytes(16).toString("hex")) {
+    let hash = hashString(hashString(password), salt);
+    return { password: hash, salt };
+};
+
+//? Funcion que verifica el Path
+function checkPath(pathname, method) {
+    const endpoint = `${pathname} ${method}`;
+    return excludedPaths.includes(endpoint);
+}
+
+server.use((req, res, next) => {
+    if (!checkPath(req.path, req.method)) {
+        const { jwt } = req.cookies;
+        let payload;
+        try {
+            if (jwt) {
+                payload = JWT.decode(jwt, SECRET);
+                if (payload) {
+                    req.user = payload;
+                    next();
+                } else {
+                    throw "No valid JWT";
+                }
+            } else {
+                throw "No payload";
+            }
+        } catch (e) {
+            res.status(403).send({ error: "You must be logged in" });
+        }
+    } else {
+        next();
+    }
+});
+
+//? Endpoint Login User
+
+server.post("/login", (req, res) => {
+    const { nickname, password } = req.body;
+    console.log(req.body);
+    if (nickname && password) {
+        usersRef.orderByChild("nickname").equalTo(nickname).once("value", (snapshot) => {
+            const user = Object.values(snapshot.val())[0];
+            console.log(user);
+            console.log(user.salt);
+            if (user) {
+                if (verifyPw(password, { password: user.password, salt: user.salt })) {
+                    res.cookie("jwt", JWT.encode({
+                        "iat": new Date(),
+                        "sub": user
+                    }, SECRET), { httpOnly: true });
+                    res.send({ "msg": "You have loggedin" });
+                } else {
+                    res.send({ "error": "The user or the password is not ok" });
+                }
+            } else {
+                res.send({ "error": "No such user registered" });
+            }
+        });
+    } else {
+        res.send({ "error": "A username and a password must be provided" });
+    }
+});
+
+function verifyPw(password, originalPassword) {
+    const hashedPw = saltPepperPw(password, originalPassword.salt);
+    console.log(hashedPw);
+    return hashedPw.password === originalPassword.password;
+
+}
+
+//Check loggedIn
+
+server.get("/user", (req, res) => {
+    res.send({ "msg": "You are logged in", "user": req.user });
+});
+
+
+//Logout
+
+server.get("/logout", (req, res) => {
+    res.clearCookie("jwt").send({ "msg": "cookie deleted" });
+})
+
+/*
+==========================
     USERS
 ==========================
 */
@@ -36,26 +144,39 @@ const tasksRef = db.ref("/tasks");
 //? Endpoint Create User
 
 server.post("/user", (req, res) => {
-    const { nickname, name, email, password } = req.body;
+    let { nickname, name, email, password } = req.body;
+    console.log(req.body);
+    const passwordPattern = /[a-zA-Z0-9]/;
     usersRef.orderByChild("nickname").equalTo(nickname).once("value", snapshot => {
         if (snapshot.val() === null) {
-            usersRef.push({
-                nickname,
-                name,
-                email,
-                password
-            }, (error) => {
-                if (error) {
-                    res.send({ msg: `The user ${nickname} cannot be created` });
+            if (nickname && name && email && password) {
+                if (passwordPattern.test(password)) {
+                    password = saltPepperPw(password);
+                    usersRef.push({
+                            nickname,
+                            name,
+                            email,
+                            ...password
+                        },
+                        (error) => {
+                            if (error) {
+                                res.send({ msg: `The user ${nickname} cannot be created` });
+                            } else {
+                                res.send({ msg: `The user ${nickname} has been created` });
+                            }
+                        });
                 } else {
-                    res.send({ msg: `The user ${nickname} has been created` });
+                    res.send({ "error": "The password must contain numbers, upper and lower case letters." });
                 }
-            });
+            } else {
+                res.send({ "error": "All fields are required" });
+            }
         } else {
             res.send({ "error": `The user ${nickname} already exists` });
         }
     });
 });
+
 
 // ? Modify user (put)
 
