@@ -17,9 +17,8 @@ const excludedPaths = ["/user POST", "/login POST"];
 // Middlewares
 
 server.use(express.json());
-server.use(cors());
+server.use(cors({credentials: true, origin:["http://127.0.0.1:5500"]}));
 server.use(cookieParser());
-server.options('*', cors());
 server.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
 server.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000, type: 'application/x-www-form-urlencoded' }));
 
