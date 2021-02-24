@@ -8,13 +8,16 @@ const crypto = require("crypto");
 const JWT = require("jwt-simple");
 const bodyParser = require('body-parser');
 
+// Import .env configuration
+require("dotenv").config({path: __dirname + "/.env"});
+
 
 // Settings
 const PORT = 8080;
 const server = express();
 const httpsServer = https.createServer({
-    key: fs.readFileSync("./cert/todobridge.key"),
-    cert: fs.readFileSync("./cert/todobridge.cert")
+    key: fs.readFileSync(__dirname + "/cert/todobridge.key"),
+    cert: fs.readFileSync(__dirname + "/cert/todobridge.cert")
 }, server);
 const SECRET = "f2ac41f4dd36b5063ac14edc64c91d1728d7acde6b69acbc32566b2883247c64";
 const excludedPaths = ["/user POST", "/login POST"];
@@ -119,34 +122,36 @@ server.post("/login", (req, res) => {
     console.log(req.body);
     if (nickname && password) {
         usersRef.orderByChild("nickname").equalTo(nickname).once("value", (snapshot) => {
-            const user = Object.values(snapshot.val())[0];
-            console.log(user);
-            console.log(user.salt);
-            if (user) {
-                if (verifyPw(password, {
-                        password: user.password,
-                        salt: user.salt
-                    })) {
-                    res.cookie("jwt", JWT.encode({
-                        "iat": new Date(),
-                        "sub": user
-                    }, SECRET), {
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: "none"
-                    });
-                    res.send({
-                        "msg": "You have loggedin"
-                    });
+            if (snapshot.val()) {
+                const user = Object.values(snapshot.val())[0];
+                console.log(user);
+                console.log(user.salt);
+                if (user) {
+                    if (verifyPw(password, {
+                            password: user.password,
+                            salt: user.salt
+                        })) {
+                        res.cookie("jwt", JWT.encode({
+                            "iat": new Date(),
+                            "sub": user
+                        }, SECRET), {
+                            httpOnly: true,
+                            secure: true,
+                            sameSite: "none"
+                        });
+                        res.send({
+                            "msg": "You have loggedin"
+                        });
+                    } else {
+                        res.send({
+                            "error": "The user or the password is not ok"
+                        });
+                    }
                 } else {
                     res.send({
-                        "error": "The user or the password is not ok"
+                        "error": "No such user registered"
                     });
                 }
-            } else {
-                res.send({
-                    "error": "No such user registered"
-                });
             }
         });
     } else {
@@ -428,5 +433,5 @@ server.put("/task/:id", (req, res) => {
 */
 
 httpsServer.listen(PORT, () => {
-    console.log(`listening on url: http://localhost:${PORT}`);
+    console.log(`listening on url: https://localhost:${PORT}`);
 })
