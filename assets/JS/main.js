@@ -49,7 +49,7 @@ function loginPainter() {
     loginBtn.id = "loginBtn";
     loginBtn.innerText = "Login";
     loginBtn.preventDefault;
-    loginBtn.addEventListener("click", getData);
+    loginBtn.addEventListener("click", loginApp);
     forgetLink.id = "forgetLink";
     forgetLink.innerHTML = `Don´t have an account? Register <a href="#" onclick="registerPainter()" >here</a>`;
 
@@ -144,7 +144,19 @@ function logRegErrors() {
 //? Login
 
 function loginApp() {
-
+    const userNick = document.getElementById("nickname");
+    const userPw = document.getElementById("password");
+    fetch("https://localhost:8080/login", {
+        method: "POST",
+        body: JSON.stringify({
+            "nickname": userNick.value,
+            "password": userPw.value
+        }),
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(response => response.json()).then(getData()).catch(e => console.error(e))
 }
 
 //? Register
@@ -156,18 +168,22 @@ function registerApp() {
 //? Create users
 
 async function createUser() {
-    const form = document.getElementById("createUserForm");
-    var obj = {};
-    for (var i = 0; i < form.elements.length; i++) {
-        var item = form.elements.item(i);
-        obj[item.id] = item.value;
-    }
-    const response = await fetch("http://localhost:8080/user", {
+    const userNick = document.getElementById("nickname");
+    const userPw = document.getElementById("password");
+    const userName = document.getElementById("name");
+    const userEmail = document.getElementById("email");
+    const response = await fetch("https://localhost:8080/user", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(obj)
+        credentials: "include",
+        body: JSON.stringify({
+            "nickname": userNick.value,
+            "password": userPw.value,
+            "name": userName.value,
+            "email": userEmail.value
+        })
     })
 }
 
@@ -187,11 +203,12 @@ async function createTask() {
         var item = form.elements.item(i);
         obj[item.name] = item.value;
     }
-    const response = await fetch("http://localhost:8080/task", {
+    await fetch("https://localhost:8080/task", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
+        credentials: "include",
         body: JSON.stringify(obj)
     })
 }
@@ -203,6 +220,70 @@ function modifyTask() {
     contentArea.remove();
 
     console.log("vamos a modificar la tarea:")
+}
+
+//? Pop Up Create Task
+
+function popUpCreaTask() {
+    const popUpWrapper = document.createElement("div");
+    const popUp = document.createElement("div");
+    const popUpClose = document.createElement("div");
+    const popUpContent = document.createElement("div");
+    const popUpTitle = document.createElement("h3");
+    const popUpForm = document.createElement("form");
+    const popUpLabelTitle = document.createElement("label");
+    const popUpInputTitle = document.createElement("input");
+    const popUpInputCheck = document.createElement("input");
+    const popUpLabelDate = document.createElement("label");
+    const popUpInputDate = document.createElement("input");
+    const popUpLabelPriority = document.createElement("label");
+    const popUpSelectPriotiry = document.createElement("select");
+
+    const popUpLabelDescription = document.createElement("label");
+    const popUpTextArea = document.createElement("textarea");
+    const popUpBtnCrea = document.createElement("button");
+    const popUpBtnEdit = document.createElement("button");
+    const popUpBtnDelete = document.createElement("button");
+
+    popUpWrapper.className = "popup-wrapper";
+    popUp.className = "popup";
+    popUpClose.className = "popup-close";
+    popUpContent.className = "popup-content";
+    popUpForm.id = "createTask";
+
+    popUpClose.innerText = "x";
+    popUpTitle.innerText = "Create a new Task";
+    popUpLabelTitle.innerText = "Título";
+    popUpLabelDate.innerText = "Fecha Límite";
+    popUpLabelPriority.innerText = "Prioridad";
+    popUpLabelDescription.innerText = "Descripción";
+    popUpBtnCrea.innerText = "Crear tarea";
+    popUpBtnEdit.innerText = "Editar tarea";
+    popUpBtnDelete.innerText = "Eliminar tarea";
+
+    popUpBtnCrea.addEventListener("click", createTask);
+    popUpBtnEdit.addEventListener("click", modifyTask);
+    // popUpBtnDelete.addEventListener("click", deleteTask);
+
+    popUpContent.appendChild(popUpTitle);
+    popUpContent.appendChild(popUpForm);
+    popUpForm.appendChild(popUpLabelTitle);
+    popUpForm.appendChild(popUpInputTitle);
+    popUpForm.appendChild(popUpInputCheck);
+    popUpForm.appendChild(popUpLabelDate);
+    popUpForm.appendChild(popUpInputDate);
+    popUpForm.appendChild(popUpLabelPriority);
+    popUpForm.appendChild(popUpSelectPriotiry);
+    popUpForm.appendChild(popUpLabelDescription);
+    popUpForm.appendChild(popUpTextArea);
+    popUpForm.appendChild(popUpBtnCrea);
+    popUpForm.appendChild(popUpBtnEdit);
+    popUpForm.appendChild(popUpBtnDelete);
+    popUp.appendChild(popUpContent);
+    popUp.appendChild(popUpClose);
+    popUpWrapper.appendChild(popUp);
+    body.appendChild(popUpWrapper);
+
 }
 
 //? Ver Tareas
@@ -306,7 +387,7 @@ function printTaskData(tasks) {
 
 async function getTasks() {
     try {
-        const response = await fetch("http://localhost:8080/task");
+        const response = await fetch("https://localhost:8080/task", {credentials: "include"});
         const data = await response.json()
         return data;
     } catch (error) {
@@ -416,7 +497,7 @@ function filterDone(a) {
 
 async function getFilterTasks() {
     try {
-        const response = await fetch("http://localhost:8080/task");
+        const response = await fetch("https://localhost:8080/task",{credentials: "include"});
         const data = await response.json()
         return data;
     } catch (error) {
