@@ -4,6 +4,8 @@
 =====================================
 */
 
+const body = document.querySelector("body");
+
 //? Login Painter
 
 function loginPainter() {
@@ -12,7 +14,6 @@ function loginPainter() {
         noNew.remove();
     };
     // Declaración de elementos que van a componer la estructura
-    const body = document.querySelector("body");
     const container = document.createElement("div");
     const contentLogin = document.createElement("div");
     const loginHeader = document.createElement("h1");
@@ -321,6 +322,7 @@ function printTaskData(tasks) {
     };
 
     const title = document.createElement("h2");
+    const createTaskBtn = document.createElement("button");
     const searchTask = document.createElement("div");
     const labelInput = document.createElement("label");
     const inputName = document.createElement("input");
@@ -328,8 +330,6 @@ function printTaskData(tasks) {
     const searchOnGoing = document.createElement("button");
     const searchGoingLate = document.createElement("button");
     const searchDone = document.createElement("button");
-
-    const body = document.querySelector("body");
     const container = document.createElement("div");
     const contentGrid = document.createElement("div");
     const headerTasks = document.createElement("header");
@@ -353,8 +353,10 @@ function printTaskData(tasks) {
     searchOnGoing.id = "onGoing";
     searchGoingLate.id = "goingLate";
     searchDone.id = "done";
+    createTaskBtn.innerText = "+";
+    createTaskBtn.id = "createTaskBtn"
     searchBtn.preventDefault;
-
+    createTaskBtn.preventDefault;
     titleTasks.innerText = "Tareas";
 
     body.appendChild(container);
@@ -366,6 +368,7 @@ function printTaskData(tasks) {
     searchOnGoing.addEventListener("click", getFilterDataOnGoing);
     searchGoingLate.addEventListener("click", getFilterDataGoingLate);
     searchDone.addEventListener("click", getFilterDataDone);
+    createTaskBtn.addEventListener("click", popUpCreaTask);
 
     contentGrid.appendChild(title);
     contentGrid.appendChild(searchTask);
@@ -375,6 +378,8 @@ function printTaskData(tasks) {
     searchTask.appendChild(searchOnGoing);
     searchTask.appendChild(searchGoingLate);
     searchTask.appendChild(searchDone);
+    titleTasks.appendChild(createTaskBtn);
+
 
     const listElements = tareas.map((task) => {
         const div = document.createElement("div");
