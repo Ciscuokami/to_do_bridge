@@ -1,3 +1,4 @@
+const body = document.querySelector("body");
 /*
 =====================================
     COMPONENTS PAINTERS
@@ -156,7 +157,7 @@ function loginApp() {
         headers: {
             "Content-Type": "application/json"
         }
-    }).then(response => response.json()).then(getData()).catch(e => console.error(e))
+    }).then(response => response.json()).then(getData).catch(e => console.error(e))
 }
 
 //? Register
@@ -305,6 +306,7 @@ function printTaskData(tasks) {
     const searchOnGoing = document.createElement("button");
     const searchGoingLate = document.createElement("button");
     const searchDone = document.createElement("button");
+    const createTaskBtn = document.createElement("button");
 
     const body = document.querySelector("body");
     const container = document.createElement("div");
@@ -331,18 +333,22 @@ function printTaskData(tasks) {
     searchGoingLate.id = "goingLate";
     searchDone.id = "done";
     searchBtn.preventDefault;
+    createTaskBtn.innerText = "+";
+    createTaskBtn.id = "createTaskBtn";
 
     titleTasks.innerText = "Tareas";
 
     body.appendChild(container);
     container.appendChild(headerTasks);
     headerTasks.appendChild(titleTasks);
+    titleTasks.appendChild(createTaskBtn);
     container.appendChild(contentGrid);
 
     searchBtn.addEventListener("click", getFilterData);
     searchOnGoing.addEventListener("click", getFilterDataOnGoing);
     searchGoingLate.addEventListener("click", getFilterDataGoingLate);
     searchDone.addEventListener("click", getFilterDataDone);
+    createTaskBtn.addEventListener("click", popUpCreaTask);
 
     contentGrid.appendChild(title);
     contentGrid.appendChild(searchTask);
