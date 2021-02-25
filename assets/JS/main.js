@@ -25,7 +25,9 @@ function loginPainter() {
     const pwField = document.createElement("input");
     const viewPw = document.createElement("span");
     const loginBtn = document.createElement("button");
-    const forgetLink = document.createElement("p");
+    const googleLoginBtn = document.createElement("button")
+    const createAccount = document.createElement("p");
+;
 
     // Asignación de propiedades a los elementos
     container.id = "container";
@@ -50,8 +52,12 @@ function loginPainter() {
     loginBtn.innerText = "Login";
     loginBtn.preventDefault;
     loginBtn.addEventListener("click", loginApp);
-    forgetLink.id = "forgetLink";
-    forgetLink.innerHTML = `Don´t have an account? Register <a href="#" onclick="registerPainter()" >here</a>`;
+    googleLoginBtn.id = "googleLoginBtn";
+    googleLoginBtn.innerText = "Login con Google";
+    googleLoginBtn.preventDefault;
+    googleLoginBtn.addEventListener("click", googleLogin);
+    createAccount.id = "createAccount";
+    createAccount.innerHTML = `Don´t have an account? Register <a href="#" onclick="registerPainter()" >here</a>`;
 
     // Pintando formulario
     body.appendChild(container);
@@ -66,7 +72,8 @@ function loginPainter() {
     loginForm.appendChild(pwField);
     loginForm.appendChild(viewPw);
     loginForm.appendChild(loginBtn);
-    contentLogin.appendChild(forgetLink);
+    loginForm.appendChild(googleLoginBtn);
+    contentLogin.appendChild(createAccount);
 
     // Return para pintar
     return container;
@@ -84,7 +91,7 @@ function registerPainter() {
     const userEmailField = document.createElement("input");
     const viewPw = document.getElementById("viewPw");
     const registerBtn = document.getElementById("loginBtn");
-    const alreadyRegistered = document.getElementById("forgetLink");;
+    const alreadyRegistered = document.getElementById("createAccount");;
 
     // Asignación de propiedades a los elementos
     registerHeader.innerText = "Your very first time at To Do Bridge?";
@@ -143,6 +150,22 @@ function logRegErrors() {
 
 //? Login
 
+function googleLogin() {
+    fetch("https://localhost:8080/googleOauth", {
+        credentials: "include"
+    }).then(response => response.json()).then(data => {
+        const {url} = data;
+        console.log(url);
+        localStorage.setItem("loginGoogle", true);
+        window.location.href = url;
+    });
+}
+
+if (localStorage.getItem("loginGoogle") === "true"){
+    fetch(`https://localhost:8080/googleOauthCallback${window.location.search}`, {credentials: "include"}).then(res => res.json()).then(data => console.log(data));
+    localStorage.clear("loginGoogle");
+}
+
 function loginApp() {
     const userNick = document.getElementById("nickname");
     const userPw = document.getElementById("password");
@@ -156,7 +179,7 @@ function loginApp() {
         headers: {
             "Content-Type": "application/json"
         }
-    }).then(response => response.json()).then(getData()).catch(e => console.error(e))
+    }).then(response => response.json()).then(getData).catch(e => console.error(e))
 }
 
 //? Register
@@ -184,8 +207,8 @@ async function createUser() {
             "name": userName.value,
             "email": userEmail.value
         })
-    })
-}
+    });
+};
 
 
 /*
@@ -483,7 +506,6 @@ function filterDone(a) {
     printTaskData(tasks);
     const cleanerBtn = document.querySelector("#clean");
     if (!cleanerBtn) {
-
         const cleanBtn = document.createElement("button");
         cleanBtn.id = "clean";
         cleanBtn.innerText = "Limpiar búsqueda";

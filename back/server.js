@@ -7,24 +7,37 @@ const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
 const JWT = require("jwt-simple");
 const bodyParser = require('body-parser');
+const {google} = require('googleapis');
 
 // Import .env configuration
 require("dotenv").config({path: __dirname + "/.env"});
+const SECRET = process.env.SECRET;
+const GOOGLEIDCLIENTE = process.env.GOOGLEIDCLIENTE;
+const GOOGLESECRET = process.env.GOOGLESECRET;
+const GOOGLEREDIRECT = process.env.GOOGLEREDIRECT;
+const PORT = process.env.PORT || 8080;
 
+// Settings Google
+const oauth2Client = new google.auth.OAuth2(
+    GOOGLEIDCLIENTE,
+    GOOGLESECRET,
+    GOOGLEREDIRECT
+  );
+
+const scopes = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile'
+  ];
 
 // Settings
-const PORT = 8080;
 const server = express();
 const httpsServer = https.createServer({
     key: fs.readFileSync(__dirname + "/cert/todobridge.key"),
     cert: fs.readFileSync(__dirname + "/cert/todobridge.cert")
 }, server);
-const SECRET = "f2ac41f4dd36b5063ac14edc64c91d1728d7acde6b69acbc32566b2883247c64";
-const excludedPaths = ["/user POST", "/login POST"];
-
+const excludedPaths = ["/user POST", "/login POST", "/googleOauth GET", "/googleOauthCallback GET"];
 
 // Middlewares
-
 server.use(express.json());
 server.use(cors({
     credentials: true,
@@ -46,6 +59,7 @@ server.use(bodyParser.urlencoded({
 // Config DB
 const firebase = require("firebase-admin");
 const serviceAccount = require("./serviceAccount.json");
+const { response } = require("express");
 
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
@@ -113,6 +127,28 @@ server.use((req, res, next) => {
 });
 
 //? Endpoint Login User
+
+//Login con Google
+server.get("/googleOauth", (req, res) => {
+    const url = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: scopes
+    });
+    res.send({url});
+});
+
+//Google OAuth Callback
+server.get("/googleOauthCallback", async(req,res) => {
+    const {code} = req.query;
+    const {tokens} = await oauth2Client.getToken(code)
+    oauth2Client.setCredentials(tokens);
+    const oauth2 = google.oauth2({auth: oauth2Client, version:"v2"});
+    oauth2.userinfo.get((error, result) =>{
+        if(error){console.log(error)}
+        else{console.log(result)}
+    } )
+});
+
 
 server.post("/login", (req, res) => {
     const {
