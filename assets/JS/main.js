@@ -412,7 +412,6 @@ function printTaskData(tasks) {
 }
 
 
-
 async function getTasks() {
     try {
         const response = await fetch("https://localhost:8080/task", {credentials: "include"});
